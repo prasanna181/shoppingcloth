@@ -6,151 +6,155 @@ import "./payment.css";
 import { DataContext } from "../context/DataProvider.jsx";
 
 import { ToastContainer, toast } from "react-toastify";
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from "react-router-dom";
 import { BASEURL } from "../../BASEURL";
+import { useForm } from "react-hook-form";
+import { ErrorMessage } from "@hookform/error-message";
 const ProductImages = require.context("../../Images/display");
 
-const updataUserDetailFromServer=(data,product)=>{
+const updataUserDetailFromServer = (data, product) => {
+  const datasend = {
+    data: data,
+    product: product,
+  };
+  const promise = new Promise((resolve, reject) => {
+    fetch(`${BASEURL}/Payment`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(datasend),
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        resolve(data);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+  return promise;
+};
 
-  const datasend={
-    data:data,
-    product:product
+const apitomakepayment = (data, product) => {
+  console.log(product);
+  if (product.length === 0) {
+    // alert("product toh daal");
+    return;
   }
-  const promise=new Promise((resolve,reject)=>{
-     fetch(`${BASEURL}/Payment`, {
-       method: "POST",
-       headers: {
-         "Content-Type": "application/json",
-       },
-       body: JSON.stringify(datasend),
-     })
-       .then((response) => {
-         return response.json();
-       })
-       .then((data) => {
-         resolve(data);
-       })
-       .catch((error) => {
-         reject(error);
-       });
-  })
+
+  const datasend = { userData: data, product: product };
+  const promise = new Promise((resolve, reject) => {
+    fetch(`${BASEURL}/create-checkout-session`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(datasend),
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        resolve(data);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
   return promise;
-}
-
-const apitomakepayment=(data,product)=>
-  {
-    console.log(product);
-    const datasend={'userData':data,"product":product};
-  const promise=new Promise((resolve,reject)=>{
-     fetch(`${BASEURL}/create-checkout-session`, {
-       method: "POST",
-       headers: {
-         "Content-Type": "application/json",
-       },
-       body: JSON.stringify(datasend),
-     })
-       .then((response) => {
-         return response.json();
-       })
-       .then((data) => {
-         resolve(data);
-       })
-       .catch((error) => {
-         reject(error);
-       });
-  })
-  return promise;
-}
-
-
-
-
-
-
-
-
+};
 
 export default function Payment() {
- const { UserData } = React.useContext(DataContext);
-console.log(UserData);
-  const InitialData=
-    {
-      name:UserData.name,
-      address:'',
-      'number':UserData.mobileno,
-      'email':UserData.email,
-    };
-   
+  const { UserData } = React.useContext(DataContext);
+  console.log(UserData);
+  const InitialData = {
+    name: UserData.name,
+    address: "",
+    number: UserData.mobileno,
+    email: UserData.email,
+  };
+
   const [payData, setPayData] = React.useState([{}]);
   const { setproduct, product } = React.useContext(DataContext);
-  React.useEffect(()=>{
+  React.useEffect(() => {
     setPayData(InitialData);
-  },[UserData])
+  }, [UserData]);
   const payDataFun = (e) => {
     setPayData({ ...payData, [e.target.name]: e.target.value });
   };
 
-// console.log(payData);
+  // console.log(payData);
   return (
     <div className="Main_container">
       <Container>
         <Row>
           <Col>
-            <Paymentdetails data={UserData} payDataFun={payDataFun} product={product} />
-          {/* </Col>
+            <Paymentdetails
+              data={UserData}
+              payDataFun={payDataFun}
+              product={product}
+            />
+            {/* </Col>
           <Col>
             <CardDetail data={payData} payDataFun={payDataFun} product={product}/> */}
           </Col>
         </Row>
       </Container>
-      <ToastContainer/>
+      <ToastContainer />
     </div>
   );
 }
 
-const Paymentdetails = ({ data, product,payDataFun }) => {
- 
-    const [filter, setFilter] = React.useState([]);
-      React.useEffect(() => {
-        if (data) {
-          setFilter(data.saveForLater);
-        }
-      }, [data]);
-    const checkFilterSaveForLater = (key, arr) => {
-      var flag = true;
-      arr.forEach((data) => {
-        if (data._id === key) {
-          flag = false;
-        }
-      });
-      return flag;
-    };
-    const productData = product.filter((item) => {
-      return checkFilterSaveForLater(item._id, filter);
-    });
-  const navigate=useNavigate();
- const makepayment = () => {
+const Paymentdetails = ({ data, product, payDataFun }) => {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
 
-  apitomakepayment(data,productData).then((data)=>{
-    console.log(data)
-    if(data.success===true){
-    window.location=data.url;
+  const [filter, setFilter] = React.useState([]);
+  React.useEffect(() => {
+    if (data) {
+      setFilter(data.saveForLater);
     }
+  }, [data]);
+  const checkFilterSaveForLater = (key, arr) => {
+    var flag = true;
+    arr.forEach((data) => {
+      if (data._id === key) {
+        flag = false;
+      }
+    });
+    return flag;
+  };
+  const productData = product.filter((item) => {
+    return checkFilterSaveForLater(item._id, filter);
   });
-//     updataUserDetailFromServer(data,product).then((success)=>{
-// toast("Payment Successfull!")
-// setTimeout(() => {
-//   navigate('/order')
-// }, 2000);
+  const navigate = useNavigate();
+  const makepayment = () => {
+    apitomakepayment(data, productData).then((data) => {
+      console.log(data);
+      if (data.success === true) {
+        window.location = data.url;
+      }
+    });
+    //     updataUserDetailFromServer(data,product).then((success)=>{
+    // toast("Payment Successfull!")
+    // setTimeout(() => {
+    //   navigate('/order')
+    // }, 2000);
 
-//     }).catch(()=>{
-//       toast.error("Something Wrong,please Try agian!");
-//     })
+    //     }).catch(()=>{
+    //       toast.error("Something Wrong,please Try agian!");
+    //     })
   };
   const inputchange = (e) => {
     payDataFun(e);
   };
-
 
   return (
     <div class="body">
@@ -158,7 +162,6 @@ const Paymentdetails = ({ data, product,payDataFun }) => {
         <h1 class="main_head"> Payment form</h1>
         <h2> Contact Details</h2>
         <p>
-          {" "}
           <b>Name:</b>
           <input
             type="text"
@@ -196,29 +199,25 @@ const Paymentdetails = ({ data, product,payDataFun }) => {
             onChange={(e) => inputchange(e)}
           />
         </p>{" "}
-         <div style={{display:'flex','justify-content':'space-around'}}>
-
+        <div style={{ display: "flex", "justify-content": "space-around" }}>
           <div>
-        <b> Number:</b>{" "}
-       
-        <input
-          value={data.mobileno}
-          name="number"
-          type="Number"
-          style={{ margin: "15px", padding: "8px" }}
-          onChange={(e) => inputchange(e)}
-        />
-        </div>
-
-        <div class="pay_button">
-          <input
-            type="submit"
-            style={{ margin: "15px", width: "100px" }}
-            onClick={() => makepayment()}
-          />
-
+            <b> Number:</b>{" "}
+            <input
+              value={data.mobileno}
+              name="number"
+              type="Number"
+              style={{ margin: "15px", padding: "8px" }}
+              onChange={(e) => inputchange(e)}
+            />
           </div>
 
+          <div class="pay_button">
+            <input
+              type="submit"
+              style={{ margin: "15px", width: "100px" }}
+              onClick={() => makepayment()}
+            />
+          </div>
         </div>
       </div>
     </div>

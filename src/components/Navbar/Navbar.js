@@ -7,13 +7,14 @@ import Women from "../Women/Women.js";
 import Kids from "../Kids/Kids.js";
 import Cart from "../Cart/Cart.js";
 import Login from "../login/Login.js";
+import TempLogin from "../login/TempLogin.js";
 import Profile from "../user/Profile.js";
 import Order from "../user/Order.js";
 import Wishlist from "../user/Wishlist.js";
 import Badge from "react-bootstrap/Badge";
-import Payment from "../payment/Payment.js"
-import  Success  from "../payment/Success.js";
-import { useNavigate } from "react-router-dom";
+import Payment from "../payment/Payment.js";
+import Success from "../payment/Success.js";
+import { useLocation, useNavigate } from "react-router-dom";
 import { BrowserRouter, Route, Link, Routes } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -34,21 +35,23 @@ import DataProvider from "../context/DataProvider.jsx";
 import { useContext } from "react";
 import { DataContext } from "../context/DataProvider.jsx";
 import { getAccessToken } from "../../utils/common-utils";
-import Button from 'react-bootstrap/Button';
-import Container from 'react-bootstrap/Container';
-import Form from 'react-bootstrap/Form';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
-import Offcanvas from 'react-bootstrap/Offcanvas';
-
+import Button from "react-bootstrap/Button";
+import Container from "react-bootstrap/Container";
+import Form from "react-bootstrap/Form";
+import Nav from "react-bootstrap/Nav";
+import Navbar from "react-bootstrap/Navbar";
+import NavDropdown from "react-bootstrap/NavDropdown";
+import Offcanvas from "react-bootstrap/Offcanvas";
+import Admin from "../Admin/Admin.js";
+import Customise from "../customize/Customise.js";
+import Add from "../Admin/Add.js";
+import Update from "../Admin/Update.js";
+import Delete from "../Admin/Delete.js";
 
 function Navbarfun() {
-
- const { isAuthenticated, isUserAuthenticated } = React.useContext(DataContext);
- const { UserData, setUserData } = React.useContext(DataContext);
-
-
+  const { isAuthenticated, isUserAuthenticated } =
+    React.useContext(DataContext);
+  const { UserData, setUserData } = React.useContext(DataContext);
 
   return (
     <div>
@@ -60,20 +63,18 @@ function Navbarfun() {
 
         <Routes>
           <Route exact path="/" element={<Home />} />
-
           <Route exact path="/Men" element={<Men />} />
           <Route exact path="/Women" element={<Women />} />
           <Route exact path="/Kids" element={<Kids />} />
-
           <Route exact path="/Cart" element={<Cart />} />
           <Route
             exact
             path="/Success"
             element={<Success UserData={UserData} />}
           />
-
           <Route exact path="/Display/:productCode" element={<Display />} />
-          <Route exact path="/Login" element={<Login />} />
+          {/* <Route exact path="/Login" element={<Login />} /> */}
+          <Route exact path="/Login" element={<TempLogin />} />
           <Route exact path="/profile" element={<Profile />} />
           <Route exact path="/order" element={<Order />} />
           <Route
@@ -86,6 +87,13 @@ function Navbarfun() {
             path="/Payment"
             element={<Payment UserData={UserData} />}
           />
+          {UserData.email === "Admin123@gmail.com" && (
+            <Route exact path="/Admin" element={<Admin />} />
+          )}
+          <Route exact path="/Admin/add" element={<Add />} />
+          <Route exact path="/Admin/update" element={<Update />} />
+          <Route exact path="/Admin/delete" element={<Delete />} />
+          <Route exact path="/customise" element={<Customise />} />
         </Routes>
       </BrowserRouter>
     </div>
@@ -103,259 +111,257 @@ const NavBarItem = ({ isAuthenticated, isUserAuthenticated }) => {
 
   const logoutfun = () => {
     isUserAuthenticated(false);
-    localStorage.removeItem('refreshToken')
+    localStorage.removeItem("refreshToken");
     navigate("/Login");
   };
   const handleBackground = (e) => {
     let value = e.target.id;
     if (value === "dark") {
       setDarkMode(false);
-          setBackgorundColor({ background: "#f1f3f6", color: "black" });
-    } 
-    else {
+      setBackgorundColor({ background: "#f1f3f6", color: "black" });
+    } else {
       setDarkMode(true);
-        setBackgorundColor({ background: "rgb(26 26 26)", color: "white" });
-
+      setBackgorundColor({ background: "rgb(26 26 26)", color: "white" });
     }
-
   };
 
-const collapseButton=()=>{
-   const ele = document.getElementById("offcanvasNavbar-expand-false"); 
-  ele.css("visibility", "collapse");
-}
+  const collapseButton = () => {
+    const ele = document.getElementById("offcanvasNavbar-expand-false");
+    ele.css("visibility", "collapse");
+  };
 
-  return (
-    <div className="comDiv">
-      <div className="Navbar-container forLaptop">
-        <Link className="NavbarItem" to="/">
-          <img onClick={bringtohome()} src={Logo} alt="" className="logo" />
-        </Link>
+  const location = useLocation();
 
-        <div className="Link">
+  if (
+    location.pathname === "/Admin" ||
+    location.pathname === "/Admin/add" ||
+    location.pathname === "/Admin/update" ||
+    location.pathname === "/Admin/delete"
+  ) {
+    return null;
+  } else {
+    return (
+      <div className="comDiv">
+        <div className="Navbar-container forLaptop">
           <Link className="NavbarItem" to="/">
-            Home
+            <img onClick={bringtohome()} src={Logo} alt="" className="logo" />
           </Link>
 
-          <Link className="NavbarItem" to="/Men">
-            Men
-          </Link>
-          <Link className="NavbarItem" to="/Women">
-            Women
-          </Link>
-
-          <Link className="NavbarItem" to="/Kids">
-            Kids
-          </Link>
-
-          {darkMode && (
-            <FontAwesomeIcon
-              id="dark"
-              onClick={handleBackground}
-              icon={faToggleOn}
-            />
-          )}
-          {!darkMode && (
-            <FontAwesomeIcon
-              id="light"
-              onClick={handleBackground}
-              icon={faToggleOff}
-            />
-          )}
-        </div>
-        <div className="nav LaptopAuthDiv">
-          {isAuthenticated === false && (
-            <Link className="login" to="/Login">
-              <div className="loginDiv">
-                <FontAwesomeIcon
-                  title="login/signup"
-                  icon={faRightFromBracket}
-                />
-              </div>
+          <div className="Link">
+            <Link className="NavbarItem" to="/">
+              Home
             </Link>
-          )}
 
-          {isAuthenticated && (
-            <Dropdown className=" Dropout loginDiv">
-              <Dropdown.Toggle variant="Secondary" id="dropdown-basic">
-                <FontAwesomeIcon icon={faUser} />
-              </Dropdown.Toggle>
-
-              <Dropdown.Menu>
-                <Link to="/profile" style={{ textDecoration: "none" }}>
-                  <Dropdown.Item href="#/action-2">My Profile</Dropdown.Item>
-                </Link>
-                <Link to="/order" style={{ textDecoration: "none" }}>
-                  <Dropdown.Item href="#/action-3">Order</Dropdown.Item>
-                </Link>
-                <Link to="/wishlist" style={{ textDecoration: "none" }}>
-                  <Dropdown.Item href="#/action-1">Wishlist</Dropdown.Item>
-                </Link>
-
-                <Dropdown.Item onClick={logoutfun}>
-                  Logout <FontAwesomeIcon title="Logout" icon={faPowerOff} />
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
-          )}
-          {isAuthenticated && (
-            <Link className="NavbarItem" to="/Cart">
-              <div className="shopCart">
-                <FontAwesomeIcon
-                  icon={faShoppingCart}
-                  className="shoppingCart"
-                />
-                <span className="badge">
-                  {" "}
-                  {product.length !== 0 && (
-                    <Badge style={{ fontSize: "8px" }} bg="secondary">
-                      {product.length}
-                    </Badge>
-                  )}
-                </span>
-              </div>
+            <Link className="NavbarItem" to="/Men">
+              Men
             </Link>
-          )}
-        </div>
-      </div>
+            <Link className="NavbarItem" to="/Women">
+              Women
+            </Link>
 
-      <div className="forMobile forMobileNav">
-        {[false].map((expand) => (
-          <Navbar key={expand} bg="light" expand={expand} className="mb-3">
-            <Container fluid>
-              <Navbar.Brand>
-                {isAuthenticated && (
-                  <Link className="NavbarItem" to="/Cart">
-                    <div className="shopCart">
-                      <FontAwesomeIcon
-                        icon={faShoppingCart}
-                        className="shoppingCart"
-                      />
-                      <span className="mobilebadge">
-                        {" "}
-                        {product.length !== 0 && (
-                          <Badge style={{ fontSize: "8px" }} bg="secondary">
-                            {product.length}
-                          </Badge>
-                        )}
-                      </span>
-                    </div>
-                  </Link>
-                )}
-              </Navbar.Brand>
-              <Navbar.Toggle
-                aria-controls={`offcanvasNavbar-expand-${expand}`}
+            <Link className="NavbarItem" to="/Kids">
+              Kids
+            </Link>
+            <Link className="NavbarItem" to="/customise">
+              Customise Tshirts
+            </Link>
+
+            {darkMode && (
+              <FontAwesomeIcon
+                id="dark"
+                onClick={handleBackground}
+                icon={faToggleOn}
               />
-              <Navbar.Offcanvas
-                id={`offcanvasNavbar-expand-${expand}`}
-                aria-labelledby={`offcanvasNavbarLabel-expand-${expand}`}
-                placement="end"
-              >
-                <Offcanvas.Header closeButton>
-                  <Offcanvas.Title id={`offcanvasNavbarLabel-expand-${expand}`}>
-                    MY SHOP
-                  </Offcanvas.Title>
-                </Offcanvas.Header>
-                <Offcanvas.Body>
-                  <Nav className="justify-content-end flex-grow-1 pe-3">
-                    <Link
-                      className="NavbarItem"
-                    
-                      to="/"
-                    >
-                      Home
-                    </Link>
-                    <Link
-                      className="NavbarItem"
-                    
-                      to="/Men"
-                    >
-                      Men
-                    </Link>
-                    <Link
-                      className="NavbarItem"
-                   
-                      to="/Women"
-                    >
-                      Women
-                    </Link>
+            )}
+            {!darkMode && (
+              <FontAwesomeIcon
+                id="light"
+                onClick={handleBackground}
+                icon={faToggleOff}
+              />
+            )}
+          </div>
+          <div className="nav LaptopAuthDiv">
+            {isAuthenticated === false && (
+              <Link className="login" to="/Login">
+                <div className="loginDiv">
+                  <FontAwesomeIcon
+                    title="login/signup"
+                    icon={faRightFromBracket}
+                  />
+                </div>
+              </Link>
+            )}
 
-                    <Link
-                      className="NavbarItem"
-                    
-                      to="/Kids"
-                    >
-                      Kids
+            {isAuthenticated && (
+              <Dropdown className=" Dropout loginDiv">
+                <Dropdown.Toggle variant="Secondary" id="dropdown-basic">
+                  <FontAwesomeIcon icon={faUser} />
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu>
+                  <Link to="/profile" style={{ textDecoration: "none" }}>
+                    <Dropdown.Item href="#/action-2">My Profile</Dropdown.Item>
+                  </Link>
+                  <Link to="/order" style={{ textDecoration: "none" }}>
+                    <Dropdown.Item href="#/action-3">Order</Dropdown.Item>
+                  </Link>
+                  <Link to="/wishlist" style={{ textDecoration: "none" }}>
+                    <Dropdown.Item href="#/action-1">Wishlist</Dropdown.Item>
+                  </Link>
+
+                  <Dropdown.Item onClick={logoutfun}>
+                    Logout <FontAwesomeIcon title="Logout" icon={faPowerOff} />
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            )}
+            {isAuthenticated && (
+              <Link className="NavbarItem" to="/Cart">
+                <div className="shopCart">
+                  <FontAwesomeIcon
+                    icon={faShoppingCart}
+                    className="shoppingCart"
+                  />
+                  <span className="badge">
+                    {" "}
+                    {product.length !== 0 && (
+                      <Badge style={{ fontSize: "8px" }} bg="secondary">
+                        {product.length}
+                      </Badge>
+                    )}
+                  </span>
+                </div>
+              </Link>
+            )}
+          </div>
+        </div>
+
+        <div className="forMobile forMobileNav">
+          {[false].map((expand) => (
+            <Navbar key={expand} bg="light" expand={expand} className="mb-3">
+              <Container fluid>
+                <Navbar.Brand>
+                  {isAuthenticated && (
+                    <Link className="NavbarItem" to="/Cart">
+                      <div className="shopCart">
+                        <FontAwesomeIcon
+                          icon={faShoppingCart}
+                          className="shoppingCart"
+                        />
+                        <span className="mobilebadge">
+                          {" "}
+                          {product.length !== 0 && (
+                            <Badge style={{ fontSize: "8px" }} bg="secondary">
+                              {product.length}
+                            </Badge>
+                          )}
+                        </span>
+                      </div>
                     </Link>
-                    {isAuthenticated === false && (
-                      <Link
-                        className="login"
-                      
-                        to="/Login"
-                      >
-                        <div className="loginDiv">
-                          <FontAwesomeIcon
-                            title="login/signup"
-                            icon={faRightFromBracket}
-                          />
-                        </div>
+                  )}
+                </Navbar.Brand>
+                <Navbar.Toggle
+                  aria-controls={`offcanvasNavbar-expand-${expand}`}
+                />
+                <Navbar.Offcanvas
+                  id={`offcanvasNavbar-expand-${expand}`}
+                  aria-labelledby={`offcanvasNavbarLabel-expand-${expand}`}
+                  placement="end"
+                >
+                  <Offcanvas.Header closeButton>
+                    <Offcanvas.Title
+                      id={`offcanvasNavbarLabel-expand-${expand}`}
+                    >
+                      MY SHOP
+                    </Offcanvas.Title>
+                  </Offcanvas.Header>
+                  <Offcanvas.Body>
+                    <Nav className="justify-content-end flex-grow-1 pe-3">
+                      <Link className="NavbarItem" to="/">
+                        Home
                       </Link>
-                    )}
-                    {isAuthenticated && (
-                      <Dropdown className="forMobileDropDown Dropout loginDiv">
-                        <Dropdown.Toggle
-                          style={{ width: "100%" }}
-                          variant="Secondary"
-                          id="dropdown-basic"
-                        >
-                          <FontAwesomeIcon icon={faUser} />
-                        </Dropdown.Toggle>
+                      <Link className="NavbarItem" to="/Men">
+                        Men
+                      </Link>
+                      <Link className="NavbarItem" to="/Women">
+                        Women
+                      </Link>
 
-                        <Dropdown.Menu>
-                          <Link
-                            to="/profile"
-                          
-                            style={{ textDecoration: "none" }}
-                          >
-                            <Dropdown.Item href="#/action-3">
-                              My Profile
-                            </Dropdown.Item>
-                          </Link>
-                          <Link
-                            to="/order"
-                            //  onClick={()=>{expand(false);}}
-                            style={{ textDecoration: "none" }}
-                          >
-                            <Dropdown.Item href="#/action-3">
-                              Order
-                            </Dropdown.Item>
-                          </Link>
-                          <Link
-                            to="/wishlist"
-                          
-                            style={{ textDecoration: "none" }}
-                          >
-                            <Dropdown.Item href="#/action-1">
-                              Wishlist
-                            </Dropdown.Item>
-                          </Link>
+                      <Link className="NavbarItem" to="/Kids">
+                        Kids
+                      </Link>
+                      <Link className="NavbarItem" to="/customise">
+                        Customise Tshirts
+                      </Link>
 
-                          <Dropdown.Item onClick={logoutfun}>
-                            Logout{" "}
-                            <FontAwesomeIcon title="Logout" icon={faPowerOff} />
-                          </Dropdown.Item>
-                        </Dropdown.Menu>
-                      </Dropdown>
-                    )}
-                  </Nav>
-                </Offcanvas.Body>
-              </Navbar.Offcanvas>
-            </Container>
-          </Navbar>
-        ))}
+                      {isAuthenticated === false && (
+                        <Link className="login" to="/Login">
+                          <div className="loginDiv">
+                            <FontAwesomeIcon
+                              title="login/signup"
+                              icon={faRightFromBracket}
+                            />
+                          </div>
+                        </Link>
+                      )}
+                      {isAuthenticated && (
+                        <Dropdown className="forMobileDropDown Dropout loginDiv">
+                          <Dropdown.Toggle
+                            style={{ width: "100%" }}
+                            variant="Secondary"
+                            id="dropdown-basic"
+                          >
+                            <FontAwesomeIcon icon={faUser} />
+                          </Dropdown.Toggle>
+
+                          <Dropdown.Menu>
+                            <Link
+                              to="/profile"
+                              style={{ textDecoration: "none" }}
+                            >
+                              <Dropdown.Item href="#/action-3">
+                                My Profile
+                              </Dropdown.Item>
+                            </Link>
+                            <Link
+                              to="/order"
+                              //  onClick={()=>{expand(false);}}
+                              style={{ textDecoration: "none" }}
+                            >
+                              <Dropdown.Item href="#/action-3">
+                                Order
+                              </Dropdown.Item>
+                            </Link>
+                            <Link
+                              to="/wishlist"
+                              style={{ textDecoration: "none" }}
+                            >
+                              <Dropdown.Item href="#/action-1">
+                                Wishlist
+                              </Dropdown.Item>
+                            </Link>
+
+                            <Dropdown.Item onClick={logoutfun}>
+                              Logout{" "}
+                              <FontAwesomeIcon
+                                title="Logout"
+                                icon={faPowerOff}
+                              />
+                            </Dropdown.Item>
+                          </Dropdown.Menu>
+                        </Dropdown>
+                      )}
+                    </Nav>
+                  </Offcanvas.Body>
+                </Navbar.Offcanvas>
+              </Container>
+            </Navbar>
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 };
 
 export default Navbarfun;

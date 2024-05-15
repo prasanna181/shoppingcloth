@@ -36,6 +36,7 @@ var AllData = {
 ///// n apis
 
 const Menvalues = () => {
+  console.log("hello from men api............");
   const promise = new Promise((resolve, reject) => {
     fetch(`${BASEURL}/Men`)
       .then((res) => {
@@ -43,10 +44,11 @@ const Menvalues = () => {
         return res.json();
       })
       .then((res) => {
-     
+        console.log(res);
         resolve(res);
       })
       .catch((error) => {
+        console.log(error);
         reject(error);
       });
   });
@@ -583,8 +585,8 @@ export default function Men() {
   });
   // filter function ends
 
-
-const [mobileScreenFilterButton,setMobileScreenFilterButton]=React.useState(false);
+  const [mobileScreenFilterButton, setMobileScreenFilterButton] =
+    React.useState(false);
 
   return (
     <div
@@ -623,9 +625,7 @@ const [mobileScreenFilterButton,setMobileScreenFilterButton]=React.useState(fals
           {!mobileScreenFilterButton && (
             <Col className="products">
               {t && <Products data={t} />}
-              {t.length === 0 && (
-                <Loader/>
-              )}
+              {t.length === 0 && <Loader />}
             </Col>
           )}
         </Row>
@@ -646,15 +646,12 @@ const [mobileScreenFilterButton,setMobileScreenFilterButton]=React.useState(fals
 }
 // Men function ends here
 
-
 // discount Calculate function
 const discountamount = (discount, original) => {
   let amount = original * (discount / 100);
   amount = Math.round(amount);
   return original - amount;
 };
-
-
 
 //Fliter Component Function (LEFT Take user input and filter)
 const Filter = ({ uniqueData, sizeData, filterData, colorData }) => {
@@ -670,18 +667,17 @@ const Filter = ({ uniqueData, sizeData, filterData, colorData }) => {
 };
 //Categories Component start
 const Categories = ({ uniqueData, filterData }) => {
- //Handle user change in Categories
+  //Handle user change in Categories
   const handleChange = (ev) => {
     var flag = false;
     var removeI = -1;
     AllData["categories"].forEach((ele, i) => {
       if (ele === ev.target.value) {
         flag = true; //check if it is already click or not
-        removeI = i;// find Index
+        removeI = i; // find Index
       }
     });
     if (flag) {
-  
       // delete AllData["brands"][removeI];
       var len = AllData["categories"].length;
       var temp = AllData["categories"][len - 1];
@@ -692,8 +688,7 @@ const Categories = ({ uniqueData, filterData }) => {
       AllData["categories"].push(ev.target.value);
     }
 
-    filterData(); 
-  
+    filterData();
   };
   return (
     <div>
@@ -886,25 +881,23 @@ const Products = ({ data }) => {
     IncreaseViewProduct(data);
 
     //recent View addded!
-     var filterRecent =[];
+    var filterRecent = [];
     if (recentView) {
-    filterRecent = recentView.filter((item) => {
+      filterRecent = recentView.filter((item) => {
         return item._id !== data._id;
       });
-     
+
       if (filterRecent.length >= 9) {
         filterRecent.pop();
       }
     }
-    if(filterRecent.length===0)
-    {
+    if (filterRecent.length === 0) {
       filterRecent.push(data);
-    }
-    else{
+    } else {
       filterRecent.unshift(data);
     }
-     setRecentView(filterRecent);
-   localStorage.setItem('recentView_online',JSON.stringify(filterRecent));
+    setRecentView(filterRecent);
+    localStorage.setItem("recentView_online", JSON.stringify(filterRecent));
   };
 
   return (
@@ -915,7 +908,7 @@ const Products = ({ data }) => {
         "flex-wrap": "wrap",
         justifyContent: "flex-start",
         margin: "10px",
-        "justify-content":'center'
+        "justify-content": "center",
       }}
     >
       {data.map((d) => {
